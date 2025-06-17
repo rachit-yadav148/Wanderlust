@@ -1,24 +1,117 @@
 <% layout("/layouts/boilerplate") %>
 
-  <h3>All Listings</h3>
+<style>
+  /* Flex container for filters and toggle */
+  #filters-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
 
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-     <% for (let listing of allListings) { %>
-        <a href="/listings/<%= listing._id %>" class="listing-link">
-            <div class="card col listing-card">
-  <img src="<%= listing.image.url %>" 
-  class="card-img-top" 
-  alt="listing_image" 
-  style="height: 20rem">
-  <div class="card-img-overlay"></div>
-  <div class="card-body">
-    <p class="card-text">
-       <b> <%= listing.title %> </b><br/>
-       &#8377; <%= listing.price.toLocaleString("en-IN") %> for 1 night
-    </p>
+  .filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.35rem;
+  }
+
+  .filter {
+    text-align: center;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+
+  .filter:hover {
+    opacity: 1;
+  }
+
+  .filter p {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+
+  .tax-toggle {
+    border: 1px solid black;
+    border-radius: 1rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    height: fit-content;
+  }
+
+  .tax-info {
+    display: none;
+    font-size: 0.9rem;
+    color: gray;
+  }
+</style>
+
+<!-- Filters and Toggle -->
+<div id="filters-row">
+  <div class="filters-container">
+    <div class="filter"><div><i class="fa-solid fa-fire"></i></div><p>Trending</p></div>
+    <div class="filter"><div><i class="fa-solid fa-bed"></i></div><p>Rooms</p></div>
+    <div class="filter"><div><i class="fa-solid fa-city"></i></div><p>Iconic Cities</p></div>
+    <div class="filter"><div><i class="fa-solid fa-mountain-sun"></i></div><p>Mountains</p></div>
+    <div class="filter"><div><i class="fa-solid fa-chess-rook"></i></div><p>Castles</p></div>
+    <div class="filter"><div><i class="fa-solid fa-person-swimming"></i></div><p>Amazing Pools</p></div>
+    <div class="filter"><div><i class="fa-solid fa-campground"></i></div><p>Camping</p></div>
+    <div class="filter"><div><i class="fa-solid fa-tractor"></i></div><p>Farms</p></div>
+    <div class="filter"><div><i class="fa-solid fa-snowman"></i></div><p>Arctic</p></div>
+    <div class="filter"><div><i class="fa-solid fa-umbrella-beach"></i></div><p>Beaches</p></div>
+    <div class="filter"><div><i class="fa-solid fa-house-chimney"></i></div><p>Villas</p></div>
+    <div class="filter"><div><i class="fa-solid fa-building"></i></div><p>Apartments</p></div>
+    <div class="filter"><div><i class="fa-solid fa-flag"></i></div><p>Resorts</p></div>
+  </div>
+
+  <!-- Toggle switch -->
+  <div class="tax-toggle">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+      <label class="form-check-label" for="switchCheckDefault">Display prices including taxes</label>
+    </div>
   </div>
 </div>
-</a>
-<% } %>
-  </div>
 
+<!-- Listings -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-4">
+  <% for (let listing of allListings) { %>
+    <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none text-dark">
+      <div class="card col listing-card mb-4">
+        <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem; object-fit: cover;">
+        <div class="card-body price-card" data-price="<%= listing.price %>">
+          <b><%= listing.title %></b><br/>
+          <span class="price-info">
+            &#8377; <span class="price-value"><%= listing.price.toLocaleString("en-IN") %></span> / night
+          </span>
+          <i class="tax-info"> &nbsp; &nbsp;(inclusive all taxes)</i>
+        </div>
+      </div>
+    </a>
+  <% } %>
+</div>
+
+<!-- Script for GST toggle -->
+<script>
+  const taxSwitch = document.getElementById("switchCheckDefault");
+  const listings = document.querySelectorAll(".price-card");
+
+  function updatePrices(includeTax) {
+    listings.forEach((card) => {
+      const basePrice = Number(card.dataset.price);
+      const priceSpan = card.querySelector(".price-value");
+      const taxInfo = card.querySelector(".tax-info");
+
+      const finalPrice = includeTax ? basePrice * 1.18 : basePrice;
+      priceSpan.textContent = Math.round(finalPrice).toLocaleString("en-IN");
+      taxInfo.style.display = includeTax ? "inline" : "none";
+    });
+  }
+
+  updatePrices(taxSwitch.checked);
+
+  taxSwitch.addEventListener("change", () => {
+    updatePrices(taxSwitch.checked);
+  });
+</script>

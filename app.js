@@ -6,6 +6,7 @@ if (process.env.NODE_ENV != "production")
 
 const express = require("express");
 const app = express();
+app.use(express.json());
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
@@ -19,6 +20,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 const userRouter = require("./routes/user.js");
+const paymentRoutes = require('./routes/payments');
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -42,6 +44,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
+app.use(paymentRoutes);
 
 const sessionOptions = {
     secret: "mysupersecretcode",
@@ -72,6 +75,10 @@ app.use((req, res, next) => {
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
+
+app.get('/success', (req, res) => {
+  res.render("success");
+});
 
 app.all("/*splat", (req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
